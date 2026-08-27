@@ -39,8 +39,3 @@ app/
         │   └── values/
         └── AndroidManifest.xml
 ```
-
-## Autor
-
-**André Vinícius Branches Cunha**  
-Ciência da Computação — Universidade Católica de Brasília
