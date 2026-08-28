@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Gas</string>
+    <string name="menu_title">Menu Principal</string>
+    <string name="menu_subtitle">Selecione uma opção</string>
 </resources>

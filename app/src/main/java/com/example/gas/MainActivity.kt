@@ -2,58 +2,116 @@ package com.example.gas
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.BaseAdapter
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.gas.databinding.ActivityMainBinding
-import com.example.gas.viewmodel.CombustivelViewModel
+import com.example.gas.databinding.ItemMenuCardBinding
+import com.example.gas.model.MenuItem
+import com.example.gas.viewmodel.MenuViewModel
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: CombustivelViewModel by viewModels ()
+    private val viewModel: MenuViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        enableEdgeToEdge()
+        val menuItems = viewModel.obterItensDoMenu()
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        val adapter = MenuAdapter(menuItems)
+        binding.gridView.adapter = adapter
+
+        binding.gridView.setOnItemClickListener { _, _, position, _ ->
+            when (position) {
+                0 -> {
+                    Toast.makeText(
+                        this,
+                        "Sobre",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                1 -> {
+                    val intent = Intent(
+                        this,
+                        CombustivelActivity::class.java
+                    )
+                    startActivity(intent)
+                }
+
+                2 -> {
+                    val intent = Intent(
+                        this,
+                        CarroActivity::class.java
+                    )
+                    startActivity(intent)
+                }
+
+                3 -> {
+                    Toast.makeText(
+                        this,
+                        "Cadastro de carro",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
-
-        configurarObserver()
-        configurarEventos()
     }
 
-    private fun configurarObserver(){
-        viewModel.resultado.observe(this){
-            resultado -> binding.txtResultado.text = resultado
-        }
-    }
+    inner class MenuAdapter(
+        private val items: List<MenuItem>
+    ) : BaseAdapter() {
 
-    private fun configurarEventos(){
-        binding.btnCalcular.setOnClickListener {
-            val precoEtanol = binding.edtEtanol.text.toString()
-            val precoGasolina = binding.edtGasolina.text.toString()
-
-            viewModel.calcular(precoEtanol,precoGasolina)
+        override fun getCount(): Int {
+            return items.size
         }
 
-        binding.btnLimpar.setOnClickListener {
-            viewModel.limpar()
-            binding.edtEtanol.text.clear()
-            binding.edtGasolina.text.clear()
+        override fun getItem(position: Int): MenuItem {
+            return items[position]
         }
 
-        binding.btnListar.setOnClickListener {
-            val intent = Intent(this, CarroActivity::class.java)
-            startActivity(intent)
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
+        override fun getView(
+            position: Int,
+            convertView: View?,
+            parent: ViewGroup?
+        ): View {
+
+            val itemBinding: ItemMenuCardBinding
+            val view: View
+
+            if (convertView == null) {
+                itemBinding = ItemMenuCardBinding.inflate(
+                    LayoutInflater.from(parent?.context),
+                    parent,
+                    false
+                )
+
+                view = itemBinding.root
+                view.tag = itemBinding
+            } else {
+                itemBinding = convertView.tag as ItemMenuCardBinding
+                view = convertView
+            }
+
+            val currentItem = items[position]
+
+            itemBinding.tvIcon.text = currentItem.emoji
+            itemBinding.tvMenuTitle.text = currentItem.title
+
+            return view
         }
     }
 }
